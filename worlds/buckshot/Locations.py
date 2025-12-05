@@ -18,7 +18,7 @@ class LocationData:
     id: int
     location_type: int = 0x00
 
-base_location_table: dict[str, LocationData] = {
+location_table: dict[str, LocationData] = {
     "Win First Round - Item 1":             LocationData(1),
     "Win First Round - Item 2":             LocationData(2),
     "Win Second Round - Item 1":            LocationData(3),
