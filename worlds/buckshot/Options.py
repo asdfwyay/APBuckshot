@@ -22,7 +22,7 @@ class CustomGoalAmount(Range):
     """
     display_name = "Custom Goal Amount"
     range_start = 1
-    range_end = 1000000000
+    range_end = 100000000
     default = 1000000
 
 class ConsumableItemLogic(Choice):
@@ -49,7 +49,8 @@ class ConsumableItemLogic(Choice):
             (e.g. The 140K goal will logically expect obtaining 2 consumable items before goaling,
                   The 1000K goal will logically expect obtaining 7 consumable items before goaling)
 
-    - **None**: Consumable items are never considered to be logically required for goal
+    - **None**: Consumable items are not considered logically required for goal
+        (except for obtaining certain achievements).
     """
     display_name = "Consumable Item Logic"
     option_tight = 0
