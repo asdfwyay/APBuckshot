@@ -1,9 +1,6 @@
 from dataclasses import dataclass, field
 from BaseClasses import Region
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from . import BuckshotWorld
+from .Enums import *
 
 @dataclass
 class RegionData:
@@ -13,11 +10,11 @@ class BuckshotRouletteRegion(Region):
     game = "Buckshot Roulette"
 
 region_table: dict[str, RegionData] = {
-    "Menu": RegionData(["Bathroom", "Double or Nothing Bathroom"]),
-    "Bathroom": RegionData(["Balcony"]),
-    "Double or Nothing Bathroom": RegionData(["Balcony", "Double or Nothing Balcony"]),
-    "Balcony": RegionData(["Base Game Table"]),
-    "Double or Nothing Balcony": RegionData(["Double or Nothing Table"]),
-    "Base Game Table": RegionData([]),
-    "Double or Nothing Table": RegionData([])
+    R_MENU: RegionData([R_BATHROOM, R_DON_BATHROOM]),
+    R_BATHROOM: RegionData([R_BALCONY]),
+    R_DON_BATHROOM: RegionData([R_BALCONY, R_DON_BALCONY]),
+    R_BALCONY: RegionData([R_TABLE]),
+    R_DON_BALCONY: RegionData([R_DON_TABLE]),
+    R_TABLE: RegionData(),
+    R_DON_TABLE: RegionData()
 }

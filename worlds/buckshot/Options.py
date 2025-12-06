@@ -1,4 +1,5 @@
-from Options import Choice, Range
+from dataclasses import dataclass
+from Options import Choice, DefaultOnToggle, OptionGroup, PerGameCommonOptions, Range
 
 class Goal(Choice):
     """
@@ -24,6 +25,22 @@ class CustomGoalAmount(Range):
     range_start = 1
     range_end = 100000000
     default = 1000000
+
+class DoubleOrNothingRequirements(Choice):
+    """
+    Specify the requirements to unlock Double or Nothing mode
+
+    - **Free**: Double or Nothing is unlocked from the start.
+    - **Vanilla**: Double or Nothing is unlocked after beating the base game.
+    - **Pills**: Double or Nothing is unlocked after obtaining the Double or Nothing Pills item in the multiworld.
+    - **Vanilla Plus**: Double or Nothing is unlocked after beating the base game and finding the pills.
+    """
+    display_name = "Double or Nothing Requirements"
+    option_free = 0
+    option_vanilla = 1
+    option_pills = 2
+    option_vanilla_plus = 3
+    default = 1
 
 class ConsumableItemLogic(Choice):
     """
@@ -59,28 +76,19 @@ class ConsumableItemLogic(Choice):
     option_none = 3
     default = 1
 
-class Achievements(Choice):
+class Achievements(DefaultOnToggle):
     """
     Specify whether achievements are added as locations to your game.
-
-    - **Enabled**: Achivements are considered locations.
-    - **Disabled**: Achivements are not considered locations.
     """
     display_name = "Achivements"
-    option_enabled = 0
-    option_disabled = 1
-    default = 0
 
-class ExcludeFullHouse(Choice):
+class ExcludeFullHouse(DefaultOnToggle):
     """
     Specify whether the Full House achivement should be excluded from the location list.
     """
     display_name = "Exclude Full House"
-    option_yes = 0
-    option_no = 1
-    default = 0
 
-class EnableShotsanity(Choice):
+class Shotsanity(Choice):
     """
     Shotsanity adds locations for every successful live and blank shot up to a specified amount.
  
@@ -156,3 +164,39 @@ class BalancedShotsanityBlankCountPerRound(Range):
     range_start = 1
     range_end = 500
     default = 5
+
+@dataclass
+class BuckshotRouletteOptions(PerGameCommonOptions):
+    goal: Goal
+    custom_goal_amount: CustomGoalAmount
+    double_or_nothing_requirements: DoubleOrNothingRequirements
+    consumable_item_logic: ConsumableItemLogic
+    achievements: Achievements
+    exclude_full_house: ExcludeFullHouse
+    shotsanity: Shotsanity
+    shotsanity_live_count: ShotsanityLiveCount
+    shotsanity_blank_count: ShotsanityBlankCount
+    balanced_shotsanity_live_count_per_round: BalancedShotsanityLiveCountPerRound
+    balanced_shotsanity_blank_count_per_round: BalancedShotsanityBlankCountPerRound
+
+option_groups = [
+    OptionGroup("Goal", [
+        Goal,
+        CustomGoalAmount,
+        DoubleOrNothingRequirements
+    ]),
+    OptionGroup("Difficulty", [
+        ConsumableItemLogic
+    ]),
+    OptionGroup("Achievements", [
+        Achievements,
+        ExcludeFullHouse
+    ]),
+    OptionGroup("Shotsanity", [
+        Shotsanity,
+        ShotsanityLiveCount,
+        ShotsanityBlankCount,
+        BalancedShotsanityLiveCountPerRound,
+        BalancedShotsanityBlankCountPerRound
+    ])
+]
