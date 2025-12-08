@@ -1,10 +1,14 @@
-from BaseClasses import ItemClassification as IC, Tutorial
+from typing import Callable
+
+from BaseClasses import CollectionState, ItemClassification as IC, Location, Tutorial
 from worlds.AutoWorld import WebWorld, World
+from worlds.generic.Rules import add_rule
 from .Enums import *
 from .Items import BuckshotRouletteItem, item_table
 from .Locations import BuckshotRouletteLocation, LocationData, location_table
 from .Options import BuckshotRouletteOptions, option_groups
 from .Regions import BuckshotRouletteRegion, region_table
+from .Rules import consumable_rule, specific_consumables_rule, full_house_rule, don_access_rule
 
 class BuckshotWebWorld(WebWorld):
     theme = "stone"
@@ -33,9 +37,7 @@ class BuckshotWorld(World):
     def __init__(self, multiworld, player):
         super().__init__(multiworld, player)
         self.included_locations = dict[str, LocationData]()
-
-    def get_filler_items(self) -> list[str]:
-        return [
+        self.filler_items = [
             item_name
             for item_name, item_data in item_table.items()
             if item_data.classification == IC.filler
@@ -43,12 +45,28 @@ class BuckshotWorld(World):
 
     def create_item(self, item_name: str) -> BuckshotRouletteItem:
         return BuckshotRouletteItem(item_name, item_table[item_name].classification, item_table[item_name].id, self.player)
+    
+    def get_filler_item_name(self) -> str:
+        self.random.choice(self.filler_items)
+
+    def get_location_subset(self, flags: int, combine="or") -> list[Location]:
+        if combine == "or":
+            return [
+                self.get_location(location_name)
+                for location_name, location_data in self.included_locations
+                if location_data.flags & flags
+            ]
+        else:
+            return [
+                self.get_location(location_name)
+                for location_name, location_data in self.included_locations
+                if (location_data.flags & flags) == flags
+            ]
 
     def create_items(self) -> None:
         # Setup Item Pool
         included_item_flags: int = I_CONSUMABLE
-        filler_items: list[str] = self.get_filler_items()
-        location_count: int = len(self.get_locations())
+        total_locations: int = len(self.multiworld.get_unfilled_locations(self.player))
 
         if self.options.goal != "70k":
             included_item_flags |= I_DOUBLE_OR_NOTHING
@@ -59,14 +77,11 @@ class BuckshotWorld(World):
         item_pool: list[BuckshotRouletteItem] = [
             self.create_item(item_name)
             for item_name, item_data in item_table.items()
-            if item_data.flags & included_item_flags == included_item_flags
+            if not item_data.flags or (item_data.flags & included_item_flags)
         ]
-        location_count -= len(item_pool)
 
         # Add Filler Items
-        item_pool += [self.create_item(
-            self.random.choice(filler_items) for _ in range(location_count)
-        )]
+        item_pool += [self.create_filler() for _ in range(total_locations - item_pool)]
 
         self.multiworld.itempool += item_pool
 
@@ -76,19 +91,21 @@ class BuckshotWorld(World):
 
         if self.options.achievements:
             included_location_flags |= L_ACHIEVEMENT
-            if self.options.goal == "1000k" or (self.options.goal == "custom" and self.options.custom_goal_amount >= 1000000):
-                included_location_flags |= L_LARGE_GOAL
-            if not self.options.exclude_full_house:
-                included_location_flags |= L_FULL_HOUSE
+        if not self.options.exclude_full_house:
+            included_location_flags |= L_FULL_HOUSE
         if self.options.goal != "70k":
-            included_location_flags |= L_DOUBLE_OR_NOTHING
+            included_location_flags |= L_DOUBLE_OR_NOTHING | L_DON_ROUND
+        if self.options.goal == "1000k" or (self.options.goal == "custom" and self.options.custom_goal_amount >= 1000000):
+            included_location_flags |= L_LARGE_GOAL
         if self.options.shotsanity != "disabled":
             included_location_flags |= L_SHOTSANITY
+        if self.options.goal in ["1000k", "custom"]:
+            included_location_flags |= L_CASH_OUT
 
         self.included_locations = {
             location_name: location_data
             for location_name, location_data in location_table.items()
-            if location_data.flags & included_location_flags == included_location_flags
+            if location_data.flags & included_location_flags == location_data.flags
         }
 
         # Create region graph and add locations
@@ -105,3 +122,105 @@ class BuckshotWorld(World):
             region.add_locations(region_filtered_locations, BuckshotRouletteLocation)
             region.add_exits(region_data.connecting_regions)
 
+    def set_rules(self) -> None:
+        # Achievement Rules
+        add_rule(
+            self.get_location("Why?"),
+            specific_consumables_rule(self, ["Magnifying Glass"])
+        )
+        add_rule(
+            self.get_location("Going Out With Style!"),
+            specific_consumables_rule(self, ["Hand Saw"])
+        )
+        add_rule(
+            self.get_location("Digita, Orava and Koni"),
+            specific_consumables_rule(self, ["Cigarette Pack", "Beer", "Expired Medicine"])
+        )
+        add_rule(
+            self.get_location("Full House"),
+            full_house_rule(self)
+        )
+
+        # Double or Nothing Access
+        if self.options.double_or_nothing_requirements in ["vanilla", "vanilla_plus"]:
+            beat_game_loc = BuckshotRouletteLocation(self.player, "Beat Base Game", None, self.get_region(R_TABLE))
+            beat_game_loc.place_locked_item(self.create_event("Beat Base Game"))
+
+        don_access: Callable[[CollectionState], bool] = None
+        if self.options.double_or_nothing_requirements == "free":
+            don_access = don_access_rule(self, [])
+        elif self.options.double_or_nothing_requirements == "vanilla":
+            don_access = don_access_rule(self, ["Beat Base Game"])
+        elif self.options.double_or_nothing_requirements == "pills":
+            don_access = don_access_rule(self, ["Double or Nothing Pills"])
+        elif self.options.double_or_nothing_requirements == "vanilla_plus":
+            don_access = don_access_rule(self, ["Beat Base Game", "Double or Nothing Pills"])
+
+        for location in self.get_location_subset(L_DOUBLE_OR_NOTHING):
+            add_rule(location, don_access)
+
+        # Consumable Item Logic
+        consumable_item_counts: tuple[int] = (0, 0, float('inf'))
+        if self.options.consumable_item_logic == "tight":
+            consumable_item_counts = (2, 3, 1)
+        if self.options.consumable_item_logic == "normal":
+            consumable_item_counts = (1, 2, 3)
+        if self.options.consumable_item_logic == "bare":
+            consumable_item_counts = (0, 0, 3)
+
+        add_rule(
+            self.get_location(f"Win Second Round - Item 1"),
+            consumable_rule(self, consumable_item_counts[0], True)
+        )
+        add_rule(
+            self.get_location(f"Win Second Round - Item 2"),
+            consumable_rule(self, consumable_item_counts[0], True)
+        )
+        add_rule(
+            self.get_location(f"Win Final Round"),
+            consumable_rule(self, consumable_item_counts[1], True)
+        )      
+
+        for location in self.get_location_subset(L_DON_ROUND):
+            min_cons = ((location.address - L_OFST_DON - 1)//consumable_item_counts[2]) + consumable_item_counts[1] + 1
+            add_rule(
+                location,
+                consumable_rule(self, min(min_cons, 9), False)
+            )
+
+        for location in self.get_location_subset(L_SHOTSANITY):
+            if self.options.shotsanity != "balanced":
+                continue
+
+            if location.address <= L_OFST_BLANK_SS:
+                shotsanity_group = (location.address - L_OFST_LIVE_SS - 1)//self.options.balanced_shotsanity_live_count_per_round
+            else:
+                shotsanity_group = (location.address - L_OFST_BLANK_SS - 1)//self.options.balanced_shotsanity_blank_count_per_round
+            
+            if shotsanity_group == 2:
+                add_rule(
+                    location,
+                    consumable_rule(self, consumable_item_counts[0], True)
+                )
+            elif shotsanity_group == 3:
+                add_rule(
+                    location,
+                    consumable_rule(self, consumable_item_counts[1], True)
+                )
+            elif shotsanity_group >= 4:
+                min_cons = consumable_item_counts[1] + (shotsanity_group - 3)//consumable_item_counts[2] + 1
+                add_rule(
+                    location,
+                    consumable_rule(self, min(min_cons, 9), False)
+                )
+
+        # Completion Condition
+        if self.options.goal == "70k":
+            goal_location = "Win Final Round"
+        elif self.options.goal == "140k":
+            goal_location = "Double or Nothing - Win 6 Rounds"
+        else:
+            goal_location = "Cash Out"
+
+        self.multiworld.get_location(goal_location, self.player).place_locked_item(self.create_event("WINNER"))
+        self.multiworld.completion_condition[self.player] = lambda state: state.has("WINNER", self.player)
