@@ -15,6 +15,6 @@ region_table: dict[str, RegionData] = {
     R_DON_BATHROOM: RegionData([R_BALCONY, R_DON_BALCONY]),
     R_BALCONY: RegionData([R_TABLE]),
     R_DON_BALCONY: RegionData([R_DON_TABLE]),
-    R_TABLE: RegionData(),
-    R_DON_TABLE: RegionData()
+    R_TABLE: RegionData([]),
+    R_DON_TABLE: RegionData([])
 }

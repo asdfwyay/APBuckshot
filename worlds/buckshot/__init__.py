@@ -111,8 +111,6 @@ class BuckshotWorld(World):
         if self.options.goal in ["1000k", "custom"]:
             included_location_flags |= L_CASH_OUT
 
-        logging.debug(f"Location Flags: {included_location_flags:08b}")
-
         # Filter locations based on flags, goal, & shotsanity settings
         self.included_locations = {
             location_name: location_data
@@ -152,6 +150,7 @@ class BuckshotWorld(World):
             region.add_locations(region_filtered_locations, BuckshotRouletteLocation)
 
         for region_name, region_data in region_table.items():
+            region = self.get_region(region_name)
             region.add_exits(region_data.connecting_regions)
 
     def set_rules(self) -> None:
@@ -177,20 +176,20 @@ class BuckshotWorld(World):
                 )
 
         # Double or Nothing Access
-        if self.options.goal != "70K":
+        if self.options.goal != "70k":
             if self.options.double_or_nothing_requirements in ["vanilla", "vanilla_plus"]:
-                beat_game_loc = BuckshotRouletteLocation(self.player, "Beat Base Game", None, self.get_region(R_TABLE))
-                beat_game_loc.place_locked_item(self.create_event("Beat Base Game"))
+                beat_game_loc = BuckshotRouletteLocation(self.player, "Base Game Beaten", None, self.get_region(R_TABLE))
+                beat_game_loc.place_locked_item(self.create_event("Base Game Beaten"))
 
             don_access: Callable[[CollectionState], bool] = None
             if self.options.double_or_nothing_requirements == "free":
                 don_access = don_access_rule(self, [])
             elif self.options.double_or_nothing_requirements == "vanilla":
-                don_access = don_access_rule(self, ["Beat Base Game"])
+                don_access = don_access_rule(self, ["Base Game Beaten"])
             elif self.options.double_or_nothing_requirements == "pills":
                 don_access = don_access_rule(self, ["Double or Nothing Pills"])
             elif self.options.double_or_nothing_requirements == "vanilla_plus":
-                don_access = don_access_rule(self, ["Beat Base Game", "Double or Nothing Pills"])
+                don_access = don_access_rule(self, ["Base Game Beaten", "Double or Nothing Pills"])
 
             for location in self.get_location_subset(L_DOUBLE_OR_NOTHING):
                 add_rule(location, don_access)
@@ -201,7 +200,7 @@ class BuckshotWorld(World):
             consumable_item_counts = (2, 3, 1)
         if self.options.consumable_item_logic == "normal":
             consumable_item_counts = (1, 2, 3)
-        if self.options.consumable_item_logic == "bare":
+        if self.options.consumable_item_logic == "minimal":
             consumable_item_counts = (0, 0, 3)
 
         add_rule(
