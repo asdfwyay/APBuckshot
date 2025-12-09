@@ -34,3 +34,5 @@ item_table: dict[str, ItemData] = {
     "Snapped Burner Phone":     ItemData(19, IC.filler),
     "Empty Adrenaline Vial":    ItemData(20, IC.filler),
 }
+
+item_id_table = {name: data.id for name, data in item_table.items()}

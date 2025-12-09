@@ -7,7 +7,7 @@ def consumable_rule(world, count: int, exclude_don=False) -> Callable[[Collectio
     consumables: list[str] = [
         item_name
         for item_name, item_data in item_table.items()
-        if item_data.flags & (I_CONSUMABLE | I_DOUBLE_OR_NOTHING if exclude_don else I_CONSUMABLE)
+        if item_data.flags & I_CONSUMABLE and (not item_data.flags & I_DOUBLE_OR_NOTHING if exclude_don else True)
     ]
     return lambda state: state.has_from_list(consumables, world.player, count)
 
