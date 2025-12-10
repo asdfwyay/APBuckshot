@@ -49,8 +49,8 @@ class BuckshotWorld(World):
     def create_item(self, item_name: str) -> BuckshotRouletteItem:
         return BuckshotRouletteItem(item_name, item_table[item_name].classification, item_table[item_name].id, self.player)
     
-    def create_event(self, event_name: str) -> BuckshotRouletteItem:
-        return BuckshotRouletteItem(event_name, IC.progression, None, self.player)
+    def create_event(self, event_name: str, id: int | None) -> BuckshotRouletteItem:
+        return BuckshotRouletteItem(event_name, IC.progression, id, self.player)
     
     def get_filler_item_name(self) -> str:
         return self.random.choice(self.filler_items)
@@ -179,7 +179,7 @@ class BuckshotWorld(World):
         if self.options.goal != "70k":
             if self.options.double_or_nothing_requirements in ["vanilla", "vanilla_plus"]:
                 beat_game_loc = BuckshotRouletteLocation(self.player, "Base Game Beaten", None, self.get_region(R_TABLE))
-                beat_game_loc.place_locked_item(self.create_event("Base Game Beaten"))
+                beat_game_loc.place_locked_item(self.create_event("Base Game Beaten", 21))
 
             don_access: Callable[[CollectionState], bool] = None
             if self.options.double_or_nothing_requirements == "free":
@@ -257,7 +257,7 @@ class BuckshotWorld(World):
         else:
             goal_location = "Cash Out"
 
-        self.multiworld.get_location(goal_location, self.player).place_locked_item(self.create_event("WINNER"))
+        self.multiworld.get_location(goal_location, self.player).place_locked_item(self.create_event("WINNER", 22))
         self.multiworld.completion_condition[self.player] = lambda state: state.has("WINNER", self.player)
 
 def int_log2(x: int) -> int:
