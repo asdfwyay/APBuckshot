@@ -1109,8 +1109,18 @@ location_table: dict[str, LocationData] = {
 	"Shotsanity - 998 Correct":					    LocationData(1091,	R_TABLE,            L_SHOTSANITY),
 	"Shotsanity - 999 Correct":					    LocationData(1092,	R_TABLE,            L_SHOTSANITY),
 	"Shotsanity - 1000 Correct":					LocationData(1093,	R_TABLE,            L_SHOTSANITY),
+    
+	"Streaksanity - 2 in a Row":					LocationData(1094,  R_TABLE,			L_STREAKSANITY),
+    "Streaksanity - 3 in a Row":					LocationData(1095,  R_TABLE,			L_STREAKSANITY),
+    "Streaksanity - 4 in a Row":					LocationData(1096,  R_TABLE,			L_STREAKSANITY),
+	"Streaksanity - 5 in a Row":					LocationData(1097,  R_TABLE,			L_STREAKSANITY),
+    "Streaksanity - 6 in a Row":					LocationData(1098,  R_TABLE,			L_STREAKSANITY),
+    "Streaksanity - 7 in a Row":					LocationData(1099,  R_TABLE,			L_STREAKSANITY),
+    "Streaksanity - 8 in a Row":					LocationData(1100,  R_TABLE,			L_STREAKSANITY),
+    "Streaksanity - 9 in a Row":					LocationData(1101,  R_TABLE,			L_STREAKSANITY),
+    "Streaksanity - 10 in a Row":					LocationData(1102,  R_TABLE,			L_STREAKSANITY),
 
-    "Cash Out":                             		LocationData(1094,  R_DON_TABLE,        L_DOUBLE_OR_NOTHING | L_CASH_OUT)
+    "Cash Out":                             		LocationData(1103,  R_DON_TABLE,        L_DOUBLE_OR_NOTHING | L_CASH_OUT)
 }
 
 location_id_table = {name: data.id for name, data in location_table.items()}
