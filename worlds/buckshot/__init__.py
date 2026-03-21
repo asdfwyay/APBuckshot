@@ -1,7 +1,8 @@
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, ClassVar, Mapping
 
 from BaseClasses import CollectionState, Item, ItemClassification as IC, Location, Tutorial
 from Fill import fill_restrictive
+from settings import Group, Bool
 from Options import OptionError
 from worlds.AutoWorld import WebWorld, World
 from worlds.generic.Rules import add_rule
@@ -10,7 +11,7 @@ from .Items import BuckshotRouletteItem, item_id_table, item_table
 from .Locations import BuckshotRouletteLocation, LocationData, location_id_table, location_table
 from .Options import BuckshotRouletteOptions, option_groups
 from .Regions import BuckshotRouletteRegion, region_table
-from .Rules import consumable_rule, specific_consumables_rule, full_house_rule, don_access_rule
+from .Rules import consumable_rule, specific_consumables_rule, full_house_rule, don_access_rule, streaksanity_rule
 
 import logging
 logger = logging.getLogger("BUCKSHOT")
@@ -29,6 +30,20 @@ class BuckshotWebWorld(WebWorld):
 
     tutorials = [setup_en]
 
+class BuckshotSettings(Group):
+    class AllowNoConsumableItemLogic(Bool):
+        """
+        Allows players to set their consumable item logic to none.
+        """
+
+    class AllowLargeUnreasonableShotsanity(Bool):
+        """
+        Allows players with unreasonable shotsanity to set their shotsanity count above 200.
+        """
+
+    allow_no_consumable_item_logic: AllowNoConsumableItemLogic | bool = False
+    allow_large_unreasonable_shotsanity: AllowLargeUnreasonableShotsanity | bool = False
+
 class BuckshotWorld(World):
     """A Computer Game by Mike Klubnika"""
     
@@ -36,6 +51,7 @@ class BuckshotWorld(World):
     web = BuckshotWebWorld()
     options: BuckshotRouletteOptions
     options_dataclass = BuckshotRouletteOptions
+    settings: ClassVar[BuckshotSettings]
     location_name_to_id = location_id_table
     item_name_to_id = item_id_table
 
@@ -47,7 +63,6 @@ class BuckshotWorld(World):
             for item_name, item_data in item_table.items()
             if item_data.classification == IC.filler
         ]
-        self.pre_fill_pool = []
 
     def create_item(self, item_name: str) -> BuckshotRouletteItem:
         return BuckshotRouletteItem(item_name, item_table[item_name].classification, item_table[item_name].id, self.player)
@@ -92,51 +107,23 @@ class BuckshotWorld(World):
             ) and item_data.classification == IC.progression
         ]
 
-        if (
-            self.options.goal == "70k"
-            and not self.options.achievements
-            and self.options.shotsanity == "off"
-        ):
-            item_pool.pop(self.random.randrange(len(item_pool)))
-        elif (
-            self.options.consumable_item_logic == "tight"
-            and self.options.goal != "70k"
-            and not self.options.achievements
-            and self.options.shotsanity == "off"
-        ):
-            base_game_consumable_item_names = [
-                item_name
-                for item_name, item_data in item_table.items()
-                if item_data.flags == I_CONSUMABLE
-            ]
-            self.pre_fill_pool = self.random.sample(
-                [
-                    item
-                    for item in item_pool
-                    if item.name in base_game_consumable_item_names
-                ],
-                3
-            )
-            item_pool = [item for item in item_pool if item not in self.pre_fill_pool]
-
         # Add Useful Items
-        pre_fill_count = len(self.pre_fill_pool)
         if "Item Luck" in self.options.included_custom_mechanics.value:
             for _ in range(min(
                 3,
-                total_locations - len(item_pool) - 1 - pre_fill_count
+                total_locations - len(item_pool) - 1
             )):
                 item_pool.append(self.create_item("Progressive Item Luck"))
         if "Life Bank" in self.options.included_custom_mechanics.value:
             for _ in range(min(
                 1 + len(self.get_location_subset(L_DON_ROUND))//6,
-                total_locations - len(item_pool) - 1 - pre_fill_count
+                total_locations - len(item_pool) - 1
             )):
                 item_pool.append(self.create_item("Life Bank Charge"))
 
         # Add Traps
         if self.options.included_traps.value:
-            num_traps = (total_locations - len(item_pool) - 1 - pre_fill_count)*self.options.trap_fill_percentage.value//100
+            num_traps = (total_locations - len(item_pool) - 1)*self.options.trap_fill_percentage.value//100
             included_traps = sorted(self.options.included_traps.value)
             for _ in range(num_traps):
                 item_pool.append(
@@ -144,7 +131,7 @@ class BuckshotWorld(World):
                 )
 
         # Add Filler Items
-        item_pool += [self.create_filler() for _ in range(total_locations - len(item_pool) - 1 - pre_fill_count)]
+        item_pool += [self.create_filler() for _ in range(total_locations - len(item_pool) - 1)]
 
         self.multiworld.itempool += item_pool
 
@@ -153,8 +140,7 @@ class BuckshotWorld(World):
         included_location_flags: int = 0x00
         custom_goal_don_locations = 6*(1 + int_log2((self.options.custom_goal_amount - 1)//35000))
 
-        if self.options.achievements:
-            included_location_flags |= L_ACHIEVEMENT
+        included_location_flags |= L_ACHIEVEMENT
         if not self.options.exclude_full_house:
             included_location_flags |= L_FULL_HOUSE
         if self.options.goal != "70k":
@@ -165,6 +151,8 @@ class BuckshotWorld(World):
             included_location_flags |= L_LARGE_GOAL
         if self.options.shotsanity != "off":
             included_location_flags |= L_SHOTSANITY
+        if self.options.streaksanity != "off":
+            included_location_flags |= L_STREAKSANITY
         if self.options.goal in ["1000k", "custom"]:
             included_location_flags |= L_CASH_OUT
 
@@ -185,6 +173,10 @@ class BuckshotWorld(World):
                 and (
                     location_data.id - L_OFST_SS <= self.options.shotsanity_count
                     if location_data.flags & L_SHOTSANITY else True
+                )
+                and (
+                    location_data.id - L_OFST_STS <= self.options.streaksanity_count - 1
+                    if location_data.flags & L_STREAKSANITY else True
                 )
             )
         }
@@ -255,7 +247,7 @@ class BuckshotWorld(World):
             # Shotsanity Logic
             for location in self.get_location_subset(L_SHOTSANITY):
                 if self.options.shotsanity != "balanced":
-                    continue
+                    break
 
                 shotsanity_group = (location.address - L_OFST_SS - 1)//self.options.balanced_shotsanity_count_per_round
                 
@@ -278,76 +270,85 @@ class BuckshotWorld(World):
                         location,
                         consumable_rule(self, min(min_cons, 9), False)
                     )
+            
+            # Streaksanity Logic
+            for location in self.get_location_subset(L_STREAKSANITY):
+                if self.options.streaksanity != "balanced":
+                    break
+
+                add_rule(
+                    location,
+                    streaksanity_rule(self, location.address - L_OFST_STS + 1, self.options.goal == "70k")
+                )
 
         # Achievement Rules
-        if self.options.achievements:
-            if self.options.consumable_item_logic != "none":
-                add_rule(
-                    self.get_location("Bronze Gates"),
-                    consumable_rule(self, consumable_item_counts[0], True)
-                )
-                add_rule(
-                    self.get_location("70K"),
-                    consumable_rule(self, consumable_item_counts[1], True)
-                )
-
+        if self.options.consumable_item_logic != "none":
             add_rule(
-                self.get_location("Why?"),
-                lambda state: specific_consumables_rule(self, ["Magnifying Glass"])(state) or 
-                              specific_consumables_rule(self, ["Adrenaline"])(state) and
-                              don_access(state)
+                self.get_location("Bronze Gates"),
+                consumable_rule(self, consumable_item_counts[0], True)
             )
             add_rule(
-                self.get_location("Going Out With Style!"),
-                lambda state: specific_consumables_rule(self, ["Hand Saw"])(state) or 
-                              specific_consumables_rule(self, ["Adrenaline"])(state) and
-                              don_access(state)
+                self.get_location("70K"),
+                consumable_rule(self, consumable_item_counts[1], True)
             )
-            
-            if self.options.goal != "70k":
-                add_rule(
-                    self.get_location("Digita, Orava and Koni"),
-                    specific_consumables_rule(self, ["Cigarette Pack", "Beer", "Expired Medicine"])
-                )
-                add_rule(
-                    self.get_location("Nope!"),
-                    lambda state: state.can_reach_location("Double or Nothing - Win 3 Rounds - Item 1", self.player)
-                )
-
-            if self.options.goal != "70k" and (self.options.custom_goal_amount > 70000 if self.options.goal == "custom" else True):
-                add_rule(
-                    self.get_location("140K"),
-                    lambda state: state.can_reach_location("Double or Nothing - Win 6 Rounds - Item 1", self.player)
-                )
-            
-            if self.options.goal == "1000k" or (self.options.goal == "custom" and self.options.custom_goal_amount >= 1000000):
-                add_rule(
-                    self.get_location("1000K"),
-                    lambda state: state.can_reach_location("Double or Nothing - Win 15 Rounds - Item 1", self.player)
-                )
-                add_rule(
-                    self.get_location("Know When To Quit"),
-                    lambda state: state.can_reach_location("Double or Nothing - Win 15 Rounds - Item 1", self.player)
-                )
-            
-            if self.options.goal != "70k" and not self.options.exclude_full_house:
-                add_rule(
-                    self.get_location("Full House"),
-                    full_house_rule(self)
-                )
-
-            if self.options.goal == "1000k":
-                add_rule(
-                    self.get_location("Cash Out"),
-                    lambda state: state.can_reach_location("1000K", self.player)
-                )
-            elif self.options.goal == "custom":
-                max_don_round = 3*(1 + int_log2((self.options.custom_goal_amount - 1)//35000))
-                add_rule(
-                    self.get_location("Cash Out"),
-                    lambda state: state.can_reach_location(f"Double or Nothing - Win {max_don_round} Rounds - Item 1", self.player)
-                )
-
+        
+        add_rule(
+            self.get_location("Why?"),
+            lambda state: specific_consumables_rule(self, ["Magnifying Glass"])(state) or 
+                          specific_consumables_rule(self, ["Adrenaline"])(state) and
+                          don_access(state)
+        )
+        add_rule(
+            self.get_location("Going Out With Style!"),
+            lambda state: specific_consumables_rule(self, ["Hand Saw"])(state) or 
+                          specific_consumables_rule(self, ["Adrenaline"])(state) and
+                          don_access(state)
+        )
+        
+        if self.options.goal != "70k":
+            add_rule(
+                self.get_location("Digita, Orava and Koni"),
+                specific_consumables_rule(self, ["Cigarette Pack", "Beer", "Expired Medicine"])
+            )
+            add_rule(
+                self.get_location("Nope!"),
+                lambda state: state.can_reach_location("Double or Nothing - Win 3 Rounds - Item 1", self.player)
+            )
+        
+        if self.options.goal != "70k" and (self.options.custom_goal_amount > 70000 if self.options.goal == "custom" else True):
+            add_rule(
+                self.get_location("140K"),
+                lambda state: state.can_reach_location("Double or Nothing - Win 6 Rounds - Item 1", self.player)
+            )
+        
+        if self.options.goal == "1000k" or (self.options.goal == "custom" and self.options.custom_goal_amount >= 1000000):
+            add_rule(
+                self.get_location("1000K"),
+                lambda state: state.can_reach_location("Double or Nothing - Win 15 Rounds - Item 1", self.player)
+            )
+            add_rule(
+                self.get_location("Know When To Quit"),
+                lambda state: state.can_reach_location("Double or Nothing - Win 15 Rounds - Item 1", self.player)
+            )
+        
+        if self.options.goal != "70k" and not self.options.exclude_full_house:
+            add_rule(
+                self.get_location("Full House"),
+                full_house_rule(self)
+            )
+        
+        if self.options.goal == "1000k":
+            add_rule(
+                self.get_location("Cash Out"),
+                lambda state: state.can_reach_location("1000K", self.player)
+            )
+        elif self.options.goal == "custom":
+            max_don_round = 3*(1 + int_log2((self.options.custom_goal_amount - 1)//35000))
+            add_rule(
+                self.get_location("Cash Out"),
+                lambda state: state.can_reach_location(f"Double or Nothing - Win {max_don_round} Rounds - Item 1", self.player)
+            )
+        
         # Completion Condition
         if self.options.goal == "70k":
             goal_location = "Win Final Round"
@@ -358,39 +359,20 @@ class BuckshotWorld(World):
 
         self.multiworld.get_location(goal_location, self.player).place_locked_item(self.create_event("WINNER", 26))
         self.multiworld.completion_condition[self.player] = lambda state: state.has("WINNER", self.player)
-
+    
     def generate_early(self) -> None:
-        '''
-        if all([
-            self.multiworld.players == 1,
-            self.options.consumable_item_logic == "tight",
-            self.options.goal != "70k",
-            self.options.shotsanity == "off",
-            not self.options.achievements
-        ]):
-            raise OptionError("Single-player worlds with 'tight' consumable item logic "
-                              "must have one of the following options set:\n"
-                              "- goal = '70k'\n"
-                              "- shotsanity = 'balanced' or 'unreasonable'\n"
-                              "- achievements = 'true'")
-        '''
-        pass
-
-    def pre_fill(self) -> None:
-        if (
-            self.options.consumable_item_logic == "tight"
-            and self.options.goal != "70k"
-            and not self.options.achievements
-            and self.options.shotsanity == "off"
+        if self.options.consumable_item_logic == "none" and not self.settings.allow_no_consumable_item_logic:
+            raise OptionError(f"Player {self.player_name} has no consumable item logic, but allow_no_consumable_item_logic "
+                               "is disabled in your host.yaml."
+            )
+        
+        if (self.options.shotsanity == "unreasonable"
+            and self.options.shotsanity_count.value > 200
+            and not self.settings.allow_large_unreasonable_shotsanity
         ):
-            item_locations = [
-                self.get_location(location_name)
-                for location_name, location_data in location_table.items()
-                if location_data.id <= 3
-            ]
-            state = CollectionState(self.multiworld)
-            state.sweep_for_advancements(item_locations)
-            fill_restrictive(self.multiworld, state, item_locations, self.pre_fill_pool, single_player_placement=True, lock=True)
+            raise OptionError(f"Player {self.player_name} has unreasonable shotsanity set and more than 200 shotsanity "
+                               "locations, but allow_large_unreasonable_shotsanity is disabled in your host.yaml."
+            )
 
     def fill_slot_data(self) -> Mapping[str, Any]:
         return {

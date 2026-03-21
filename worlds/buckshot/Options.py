@@ -111,12 +111,6 @@ class TrapFillPercentage(Range):
     range_end = 100
     default = 10
 
-class Achievements(DefaultOnToggle):
-    """
-    Specify whether achievements are added as locations to your game.
-    """
-    display_name = "Achivements"
-
 class ExcludeFullHouse(DefaultOnToggle):
     """
     Specify whether the Full House achivement should be excluded from the location list.
@@ -173,6 +167,32 @@ class BalancedShotsanityCountPerRound(Range):
     range_end = 1000
     default = 5
 
+class Streaksanity(Choice):
+    """
+    Streaksanity adds locations for every successful shot made on the dealer in a row without getting shot yourself.
+ 
+    - **Off**:
+        Streaksanity is disabled.
+    - **Balanced**:
+        Streaksanity is enabled. Consumable item logic also applies to streaksanity locations.
+    - **Unreasonable**:
+        Streaksanity is enabled. No logic applies to streaksanity locations.
+    """
+    display_name = "Streaksanity"
+    option_off = 0
+    option_balanced = 1
+    option_unreasonable = 2
+    default = 0
+
+class StreaksanityCount(Range):
+    """
+    If Streaksanity is enabled, specify the maximum streak to be included.
+    """
+    display_name = "Streaksanity Count"
+    range_start = 2
+    range_end = 10
+    default = 8
+
 @dataclass
 class BuckshotRouletteOptions(PerGameCommonOptions):
     goal: Goal
@@ -182,11 +202,12 @@ class BuckshotRouletteOptions(PerGameCommonOptions):
     included_custom_mechanics: IncludedCustomMechanics
     included_traps: IncludedTraps
     trap_fill_percentage: TrapFillPercentage
-    achievements: Achievements
     exclude_full_house: ExcludeFullHouse
     shotsanity: Shotsanity
     shotsanity_count: ShotsanityCount
     balanced_shotsanity_count_per_round: BalancedShotsanityCountPerRound
+    streaksanity: Streaksanity
+    streaksanity_count: StreaksanityCount
 
 option_groups = [
     OptionGroup("Goal", [
@@ -201,12 +222,15 @@ option_groups = [
         TrapFillPercentage
     ]),
     OptionGroup("Achievements", [
-        Achievements,
         ExcludeFullHouse
     ]),
     OptionGroup("Shotsanity", [
         Shotsanity,
         ShotsanityCount,
         BalancedShotsanityCountPerRound
+    ]),
+    OptionGroup("Streaksanity", [
+        Streaksanity,
+        StreaksanityCount
     ])
 ]
