@@ -169,18 +169,28 @@ class BalancedShotsanityCountPerRound(Range):
 
 class Streaksanity(Choice):
     """
-    Streaksanity adds locations for every successful shot made on the dealer in a row without getting shot yourself.
+    Streaksanity adds locations for every successful shot made on the dealer in a row without losing health (or resetting).
  
     - **Off**:
         Streaksanity is disabled.
-    - **Balanced**:
-        Streaksanity is enabled. Consumable item logic also applies to streaksanity locations.
+    - **Logical**:
+        Streaksanity is enabled. Logic will be applied to streak locations as follows:
+        
+        A score is calculated based on your currently obtained items:
+            - Handcuffs: +2 pts
+            - Magnifying Glass: +1 pt
+            - Beer: +1 pt
+            - Burner Phone: +1 pt (if Double or Nothing is accessible)
+            - Adrenaline: +1 pt (if Double or Nothing is accessible)
+            - Inverter: +1 pt (if Double or Nothing is accessible)
+        A streak of `n` will require a score of at least `n + 3`.
+        In addition, all streaks of at least 5 logically require handcuffs.
     - **Unreasonable**:
         Streaksanity is enabled. No logic applies to streaksanity locations.
     """
     display_name = "Streaksanity"
     option_off = 0
-    option_balanced = 1
+    option_logical = 1
     option_unreasonable = 2
     default = 0
 
@@ -191,7 +201,7 @@ class StreaksanityCount(Range):
     display_name = "Streaksanity Count"
     range_start = 2
     range_end = 10
-    default = 8
+    default = 7
 
 @dataclass
 class BuckshotRouletteOptions(PerGameCommonOptions):

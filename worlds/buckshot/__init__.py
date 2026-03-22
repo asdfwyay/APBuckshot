@@ -273,7 +273,7 @@ class BuckshotWorld(World):
             
             # Streaksanity Logic
             for location in self.get_location_subset(L_STREAKSANITY):
-                if self.options.streaksanity != "balanced":
+                if self.options.streaksanity != "logical":
                     break
 
                 add_rule(
