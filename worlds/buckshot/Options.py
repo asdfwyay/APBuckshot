@@ -79,6 +79,8 @@ class ConsumableItemLogic(Choice):
 class IncludedCustomMechanics(OptionSet):
     """
     Specify which custom mechanics are added to the game.
+
+    ***ACTUAL OPTIONS***
     
     **Item Luck**: Adds 3 items to the pool named "Progressive Item Luck". For each progressive item luck you
     obtain, the likelihood of pulling an item increases.
@@ -87,10 +89,109 @@ class IncludedCustomMechanics(OptionSet):
     You gain life bank charges by finding items called "Life Bank Charge" spread throughout the multiworld.
     Spend a charge from your life bank any time during your turn to restore a charge during the round. Your
     charges are given back to you on a new run.
+
+    **Item Buffs**: Finding "Item Buff" items in the multiworld will allow you to strengthen your consumable items
+    for a limited time. When activated, buffs last for one round. They refresh every run.
+
+    **Item Debuffs**: Start with a selection of consumable item debuffed. Finding an item's respective "Clear Debuff"
+    in the multiworld will remove its debuff.
+
+    ***SIDE EFFECTS***
+
+    **Poison Gauge**: A value representing the expected amount of damage you will take at the beginning
+    of every turn as follows:
+
+        Poison Gauge | Guaranteed Damage Every Turn | Chance of Losing One Extra Charge
+        -------------+------------------------------+----------------------------------
+              p      |    d = p / 100 rounded down  |           p / 100 - d            
+        -------------+------------------------------+----------------------------------
+                                           EXAMPLES                                    
+        -------------+------------------------------+----------------------------------
+              30     |              0               |               30%                
+             100     |              1               |                0%                
+             240     |              2               |               40%                
+
+    Certain item debuffs will affect the poison gauge. The poison gauge is reset to 0 when starting a new round.
     """
     display_name = "Included Custom Mechanics"
-    valid_keys = ["Item Luck", "Life Bank"]
-    default = frozenset({"Item Luck", "Life Bank"})
+    valid_keys = ["Item Luck", "Life Bank", "Item Buffs", "Item Debuffs"]
+    default = frozenset({"Item Luck", "Life Bank", "Item Buffs"})
+
+class ItemBuffs(OptionSet):
+    """
+    Specify which items to include buffs for. Ignored if "Item Buffs" is not included in "Included Custom Mechanics."
+
+    **Hand Saw**: Deals an extra point of damage (2 -> 3)
+    **Magnifying Glass**: Gains an additional use (1 -> 2)
+    **Beer**: Gains the ability to clear the shotgun, immediately moving on to the next batch.
+    **Cigarette Pack**: 50% chance to heal 2 charges instead of 1
+    **Handcuffs**: Dealer skips one extra turn (1 -> 2)
+    **Expired Medicine**: Buffs chance of healing (1 in 2 -> 5 in 6)
+    **Burner Phone**: Gains the ability to select which shell to get info about (2nd - 8th)
+    **Adrenaline**: Prevents dealer from stealing your items while it's on the table
+    **Inverter**: Applies a Schrodinger's Bullet Trap to the dealer
+    """
+    display_name = "Item Buffs"
+    valid_keys = [
+        "Hand Saw",
+        "Magnifying Glass",
+        "Beer",
+        "Cigarette Pack",
+        "Handcuffs",
+        "Expired Medicine",
+        "Burner Phone",
+        "Adrenaline",
+        "Inverter"
+    ]
+    default = frozenset({
+        "Hand Saw",
+        "Magnifying Glass",
+        "Beer",
+        "Cigarette Pack",
+        "Handcuffs",
+        "Expired Medicine",
+        "Burner Phone",
+        "Adrenaline",
+        "Inverter"
+    })
+
+class ItemDebuffs(OptionSet):
+    """
+    Specify which items should start with a debuff. Ignored if "Item Debuffs" is not included in "Included Custom Mechanics."
+
+    **Hand Saw**: 25% chance to also deal 1 damage to the player
+    **Magnifying Glass**: 25% chance to break without viewing the current shell
+    **Beer**: Adds 15 to the poison gauge (see custom mechanics)
+    **Cigarette Pack**: Adds 30 to the poison gauge (see custom mechanics)
+    **Handcuffs**: 25% chance for the dealer to immediately break free
+    **Expired Medicine**: Failing the coin flip will also add 20 to the poison gauge (see custom mechanics)
+    **Burner Phone**: 25% chance to get no information
+    **Adrenaline**: Adds 50 to the poison gauge (see custom mechanics)
+    **Inverter**: 25% chance to not invert the current shell
+    """
+    display_name = "Item Debuffs"
+    valid_keys = [
+        "Hand Saw",
+        "Magnifying Glass",
+        "Beer",
+        "Cigarette Pack",
+        "Handcuffs",
+        "Expired Medicine",
+        "Burner Phone",
+        "Adrenaline",
+        "Inverter"
+    ]
+    default = frozenset({
+        "Hand Saw",
+        "Magnifying Glass",
+        "Beer",
+        "Cigarette Pack",
+        "Handcuffs",
+        "Expired Medicine",
+        "Burner Phone",
+        "Adrenaline",
+        "Inverter"
+    })
 
 class IncludedTraps(OptionSet):
     """
@@ -210,6 +311,8 @@ class BuckshotRouletteOptions(PerGameCommonOptions):
     double_or_nothing_requirements: DoubleOrNothingRequirements
     consumable_item_logic: ConsumableItemLogic
     included_custom_mechanics: IncludedCustomMechanics
+    item_buffs: ItemBuffs
+    item_debuffs: ItemDebuffs
     included_traps: IncludedTraps
     trap_fill_percentage: TrapFillPercentage
     exclude_full_house: ExcludeFullHouse
@@ -228,6 +331,8 @@ option_groups = [
     OptionGroup("Difficulty", [
         ConsumableItemLogic,
         IncludedCustomMechanics,
+        ItemBuffs,
+        ItemDebuffs,
         IncludedTraps,
         TrapFillPercentage
     ]),

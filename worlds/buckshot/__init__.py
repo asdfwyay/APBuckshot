@@ -7,7 +7,7 @@ from Options import OptionError
 from worlds.AutoWorld import WebWorld, World
 from worlds.generic.Rules import add_rule
 from .Enums import *
-from .Items import BuckshotRouletteItem, item_id_table, item_table
+from .Items import BuckshotRouletteItem, item_id_table, item_name_table, item_table
 from .Locations import BuckshotRouletteLocation, LocationData, location_id_table, location_table
 from .Options import BuckshotRouletteOptions, option_groups
 from .Regions import BuckshotRouletteRegion, region_table
@@ -108,18 +108,58 @@ class BuckshotWorld(World):
         ]
 
         # Add Useful Items
+        custom_mechanic_counts_expected = {
+            "Item Debuffs": len(self.options.item_debuffs.value),
+            "Item Luck": 3,
+            "Item Buffs": len(self.options.item_buffs.value),
+            "Life Bank": 1 + len(self.get_location_subset(L_DON_ROUND))//6
+        }
+        custom_mechanic_counts_actual = {
+            "Item Debuffs": 0,
+            "Item Luck": 0,
+            "Item Buffs": 0,
+            "Life Bank": 0
+        }
+
+        if "Item Debuffs" in self.options.included_custom_mechanics.value:
+            id = I_OFST_MECH + 12
+            while (total_locations - len(item_pool) - 1 > 0 and id < I_OFST_MECH + 21):
+                if item_name_table[id - I_OFST_MECH - 10] in self.options.item_debuffs.value:
+                    item_pool.append(self.create_item(item_name_table[id]))
+                    custom_mechanic_counts_actual["Item Debuffs"] += 1
+                id += 1
         if "Item Luck" in self.options.included_custom_mechanics.value:
             for _ in range(min(
                 3,
                 total_locations - len(item_pool) - 1
             )):
                 item_pool.append(self.create_item("Progressive Item Luck"))
+                custom_mechanic_counts_actual["Item Luck"] += 1
+        if "Item Buffs" in self.options.included_custom_mechanics.value:
+            id = I_OFST_MECH + 3
+            while (total_locations - len(item_pool) - 1 > 0 and id < I_OFST_MECH + 12):
+                if item_name_table[id - I_OFST_MECH - 1] in self.options.item_buffs.value:
+                    item_pool.append(self.create_item(item_name_table[id]))
+                    custom_mechanic_counts_actual["Item Buffs"] += 1
+                id += 1
         if "Life Bank" in self.options.included_custom_mechanics.value:
             for _ in range(min(
                 1 + len(self.get_location_subset(L_DON_ROUND))//6,
                 total_locations - len(item_pool) - 1
             )):
                 item_pool.append(self.create_item("Life Bank Charge"))
+                custom_mechanic_counts_actual["Life Bank"] += 1
+
+        # Check if all custom mechanic items were included; warn if not
+        for mech in self.options.included_custom_mechanics.value:
+            if custom_mechanic_counts_actual[mech] != custom_mechanic_counts_expected[mech]:
+                warn_msg = ("Unable to place all custom mechanic items. Please increase the number of "
+                            "locations or remove some custom mechanics.\n"
+                            "Items Placed: \n")
+                for mech in self.options.included_custom_mechanics.value:
+                    warn_msg += f"{mech + ':':<16}{custom_mechanic_counts_actual[mech]}/{custom_mechanic_counts_expected[mech]}\n"
+                logger.warning(warn_msg)
+                break
 
         # Add Traps
         if self.options.included_traps.value:
@@ -378,7 +418,8 @@ class BuckshotWorld(World):
         return {
             "goal": self.options.goal.value,
             "custom_goal_amount": self.options.custom_goal_amount.value,
-            "double_or_nothing_requirements": self.options.double_or_nothing_requirements.value
+            "double_or_nothing_requirements": self.options.double_or_nothing_requirements.value,
+            "item_debuffs": self.options.item_debuffs.value
         }
 
 def int_log2(x: int) -> int:
