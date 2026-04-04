@@ -92,7 +92,7 @@ class IncludedCustomMechanics(OptionSet):
 
     **Item Buffs**: Finding "Item Buff" items in the multiworld will apply a permanent buff to your consumable items.
 
-    **Item Debuffs**: Start with a selection of consumable item debuffed. Finding an item's respective "Clear Debuff"
+    **Item Debuffs**: Start with a selection of consumable items debuffed. Finding an item's respective "Clear Debuff"
     in the multiworld will remove its debuff.
 
     ***SIDE EFFECTS***
