@@ -122,13 +122,13 @@ class ItemBuffs(OptionSet):
     Specify which items to include buffs for. Ignored if "Item Buffs" is not included in "Included Custom Mechanics."
 
     **Hand Saw**: Deals an extra point of damage (2 -> 3)
-    **Magnifying Glass**: Gains an additional use (1 -> 2)
+    **Magnifying Glass**: Gains the ability to convert the current shell to either live or blank (50% success chance)
     **Beer**: Gains the ability to clear the shotgun, immediately moving on to the next batch.
     **Cigarette Pack**: 50% chance to heal 2 charges instead of 1
     **Handcuffs**: Dealer skips one extra turn (1 -> 2)
     **Expired Medicine**: Buffs chance of healing (1 in 2 -> 5 in 6)
     **Burner Phone**: Gains the ability to select which shell to get info about (2nd - 8th)
-    **Adrenaline**: Prevents dealer from stealing your items while it's on the table
+    **Adrenaline**: Gains the ability to steal the dealer's adrenaline
     **Inverter**: Applies a Schrodinger's Bullet Trap to the dealer
     """
     display_name = "Item Buffs"
@@ -160,7 +160,7 @@ class ItemDebuffs(OptionSet):
     Specify which items should start with a debuff. Ignored if "Item Debuffs" is not included in "Included Custom Mechanics."
 
     **Hand Saw**: 25% chance to also deal 1 damage to the player
-    **Magnifying Glass**: 25% chance to break without viewing the current shell
+    **Magnifying Glass**: 40% chance to gain no information when viewing the current shell
     **Beer**: Adds 15 to the poison gauge (see custom mechanics)
     **Cigarette Pack**: Adds 30 to the poison gauge (see custom mechanics)
     **Handcuffs**: 25% chance for the dealer to immediately break free
