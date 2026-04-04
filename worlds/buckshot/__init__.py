@@ -419,7 +419,8 @@ class BuckshotWorld(World):
             "goal": self.options.goal.value,
             "custom_goal_amount": self.options.custom_goal_amount.value,
             "double_or_nothing_requirements": self.options.double_or_nothing_requirements.value,
-            "item_debuffs": self.options.item_debuffs.value
+            "item_debuffs": self.options.item_debuffs.value,
+            "included_custom_mechanics": self.options.included_custom_mechanics.value
         }
 
 def int_log2(x: int) -> int:
