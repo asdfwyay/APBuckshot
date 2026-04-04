@@ -90,8 +90,7 @@ class IncludedCustomMechanics(OptionSet):
     Spend a charge from your life bank any time during your turn to restore a charge during the round. Your
     charges are given back to you on a new run.
 
-    **Item Buffs**: Finding "Item Buff" items in the multiworld will allow you to strengthen your consumable items
-    for a limited time. When activated, buffs last for one round. They refresh every run.
+    **Item Buffs**: Finding "Item Buff" items in the multiworld will apply a permanent buff to your consumable items.
 
     **Item Debuffs**: Start with a selection of consumable item debuffed. Finding an item's respective "Clear Debuff"
     in the multiworld will remove its debuff.
