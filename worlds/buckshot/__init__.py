@@ -397,7 +397,7 @@ class BuckshotWorld(World):
         else:
             goal_location = "Cash Out"
 
-        self.multiworld.get_location(goal_location, self.player).place_locked_item(self.create_event("WINNER", 26))
+        self.multiworld.get_location(goal_location, self.player).place_locked_item(self.create_event("WINNER", 0x0F00 + 2))
         self.multiworld.completion_condition[self.player] = lambda state: state.has("WINNER", self.player)
     
     def generate_early(self) -> None:
