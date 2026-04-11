@@ -59,7 +59,7 @@ the game once this happens. You should now see two executables in your installat
     
     The second option is recommended, since launching the game from Steam will NOT load the modded version.
 
-7.  Create a `/mods` directory in your installation folder and place the Buckshot Roulette Archipelago mod (`asdfwyay-APBuckshot-{version}.zip`) in there. Do not unzip the mod.
+7.  Create a `/mods` directory in your installation folder and place the Buckshot Roulette Archipelago mod (`asdfwyay-APBuckshot-{version}.zip`) in there. **Do not unzip the mod**.
 
 8.  Launch Buckshot Roulette and enjoy! A notification will appear on your first launch stating
 that new mods have been installed. When reaching the start menu, an `ARCHIPELAGO` button should be visible
