@@ -23,7 +23,7 @@ class CustomGoalAmount(Range):
     """
     display_name = "Custom Goal Amount"
     range_start = 1
-    range_end = 100000000
+    range_end = 1000000000
     default = 1000000
 
 class DoubleOrNothingRequirements(Choice):
