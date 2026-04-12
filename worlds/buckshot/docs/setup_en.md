@@ -44,7 +44,7 @@
 
     2. Run the following command:
         - **Windows**:
-            - *Powershell*: `& .\"Buckshot Roulette.exe" --script addons/mod_loader/mod_loader_setup.gd`
+            - *Powershell*: `& ".\Buckshot Roulette.exe" --script addons/mod_loader/mod_loader_setup.gd`
             - *Command Prompt*: `"Buckshot Roulette.exe" --script addons/mod_loader/mod_loader_setup.gd`
         - **Mac/Linux**: `./"Buckshot Roulette" --script addons/mod_loader/mod_loader_setup.gd --setup-create-override-cfg`
 
