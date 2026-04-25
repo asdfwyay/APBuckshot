@@ -38,3 +38,10 @@ R_BALCONY = "Balcony"
 R_DON_BALCONY = "Double or Nothing Balcony"
 R_TABLE = "Base Game Table"
 R_DON_TABLE = "Double or Nothing Table"
+
+# Point Increase Filler Item Values
+V_TINY = 0.25
+V_SMALL = 0.5
+V_MEDIUM = 1.0
+V_LARGE = 2.0
+V_HUGE = 5.0

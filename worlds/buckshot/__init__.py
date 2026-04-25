@@ -13,6 +13,7 @@ from .Options import BuckshotRouletteOptions, option_groups
 from .Regions import BuckshotRouletteRegion, region_table
 from .Rules import consumable_rule, specific_consumables_rule, full_house_rule, don_access_rule, streaksanity_rule
 
+import math
 import logging
 logger = logging.getLogger("BUCKSHOT")
 
@@ -61,8 +62,16 @@ class BuckshotWorld(World):
         self.filler_items = [
             item_name
             for item_name, item_data in item_table.items()
-            if item_data.classification == IC.filler
+            if item_data.classification == IC.filler and item_data.id < I_OFST_FILL_PTS
         ]
+
+        self.filler_pt_items = [
+            item_name
+            for item_name, item_data in item_table.items()
+            if item_data.classification == IC.filler and item_data.id >= I_OFST_FILL_PTS
+        ]
+        self.point_percentage_filled = 0
+        self.point_item_weights = [1 for _ in self.filler_pt_items]
 
     def create_item(self, item_name: str) -> BuckshotRouletteItem:
         return BuckshotRouletteItem(item_name, item_table[item_name].classification, item_table[item_name].id, self.player)
@@ -71,7 +80,10 @@ class BuckshotWorld(World):
         return BuckshotRouletteItem(event_name, IC.progression, id, self.player)
     
     def get_filler_item_name(self) -> str:
-        return self.random.choice(self.filler_items)
+        if not self.options.asynchronous_points or self.point_percentage_filled >= self.options.point_filler_percentage:
+            return self.random.choice(self.filler_items)
+        else:
+            return self.random.choices(self.filler_pt_items, weights=self.point_item_weights, k=1)[0]
 
     def get_location_subset(self, flags: int, combine="or") -> list[Location]:
         if combine == "or":
@@ -86,6 +98,23 @@ class BuckshotWorld(World):
                 for location_name, location_data in self.included_locations.items()
                 if (location_data.flags & flags) == flags
             ]
+        
+    def generate_point_item_weights(self, remaining_locations: int) -> list[float]:
+        k = self.options.point_filler_percentage / remaining_locations
+        if k <= V_TINY:
+            weights = [0 for _ in self.filler_pt_items]
+            weights[0] = 1
+        elif k >= V_HUGE:
+            weights = [0 for _ in self.filler_pt_items]
+            weights[-1] = 1
+        else:
+            n = len(self.filler_pt_items) - 1
+            mu = (V_TINY + V_HUGE) / 2
+            sig = (V_HUGE - V_TINY) / (n + 1)
+            p = norm_cdf(k, mu, sig)
+            weights = [binomial_pmf(i, n, p) for i in range(n + 1)]
+        
+        return weights
 
     def create_items(self) -> None:
         # Setup Item Pool
@@ -171,7 +200,10 @@ class BuckshotWorld(World):
                 )
 
         # Add Filler Items
-        item_pool += [self.create_filler() for _ in range(total_locations - len(item_pool) - 1)]
+        remaining_locations = total_locations - len(item_pool) - 1
+        if self.options.asynchronous_points and remaining_locations > 0:
+            self.point_item_weights = self.generate_point_item_weights(remaining_locations)
+        item_pool += [self.create_filler() for _ in range(remaining_locations)]
 
         self.multiworld.itempool += item_pool
 
@@ -420,7 +452,9 @@ class BuckshotWorld(World):
             "custom_goal_amount": self.options.custom_goal_amount.value,
             "double_or_nothing_requirements": self.options.double_or_nothing_requirements.value,
             "item_debuffs": self.options.item_debuffs.value,
-            "included_custom_mechanics": self.options.included_custom_mechanics.value
+            "included_custom_mechanics": self.options.included_custom_mechanics.value,
+            "asynchronous_points": self.options.asynchronous_points.value,
+            "point_filler_percentage": self.options.point_filler_percentage
         }
 
 def int_log2(x: int) -> int:
@@ -429,3 +463,9 @@ def int_log2(x: int) -> int:
         x >>= 1
         count += 1
     return count
+
+def norm_cdf(x, mu=0, sigma=1):
+    return (1.0 + math.erf((x - mu) / (sigma * math.sqrt(2.0)))) / 2.0
+
+def binomial_pmf(k, n, p):
+    return math.comb(n, k) * (p**k) * ((1-p)**(n-k))
