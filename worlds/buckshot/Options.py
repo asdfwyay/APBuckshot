@@ -354,6 +354,9 @@ class BuckshotRouletteOptions(PerGameCommonOptions):
     goal: Goal
     custom_goal_amount: CustomGoalAmount
     double_or_nothing_requirements: DoubleOrNothingRequirements
+    additional_goal_requirements: AdditionalGoalRequirements
+    asynchronous_points: AsynchronousPoints
+    point_filler_percentage: PointFillerPercentage
     consumable_item_logic: ConsumableItemLogic
     included_custom_mechanics: IncludedCustomMechanics
     item_buffs: ItemBuffs
@@ -364,6 +367,7 @@ class BuckshotRouletteOptions(PerGameCommonOptions):
     shotsanity: Shotsanity
     shotsanity_count: ShotsanityCount
     balanced_shotsanity_count_per_round: BalancedShotsanityCountPerRound
+    shotsanity_goal_percentage: ShotsanityGoalPercentage
     streaksanity: Streaksanity
     streaksanity_count: StreaksanityCount
 
