@@ -7,7 +7,7 @@ from Options import OptionError
 from worlds.AutoWorld import WebWorld, World
 from worlds.generic.Rules import add_rule
 from .Enums import *
-from .Items import BuckshotRouletteItem, item_id_table, item_name_table, item_table
+from .Items import BuckshotRouletteItem, item_id_table, item_name_table, item_table, point_table
 from .Locations import BuckshotRouletteLocation, LocationData, location_id_table, location_table
 from .Options import BuckshotRouletteOptions, option_groups
 from .Regions import BuckshotRouletteRegion, region_table
@@ -83,7 +83,9 @@ class BuckshotWorld(World):
         if not self.options.asynchronous_points or self.point_percentage_filled >= self.options.point_filler_percentage:
             return self.random.choice(self.filler_items)
         else:
-            return self.random.choices(self.filler_pt_items, weights=self.point_item_weights, k=1)[0]
+            filler_item_name = self.random.choices(self.filler_pt_items, weights=self.point_item_weights, k=1)[0]
+            self.point_percentage_filled += point_table[filler_item_name]
+            return filler_item_name
 
     def get_location_subset(self, flags: int, combine="or") -> list[Location]:
         if combine == "or":
@@ -454,7 +456,7 @@ class BuckshotWorld(World):
             "item_debuffs": self.options.item_debuffs.value,
             "included_custom_mechanics": self.options.included_custom_mechanics.value,
             "asynchronous_points": self.options.asynchronous_points.value,
-            "point_filler_percentage": self.options.point_filler_percentage
+            "point_filler_percentage": self.options.point_filler_percentage.value
         }
 
 def int_log2(x: int) -> int:

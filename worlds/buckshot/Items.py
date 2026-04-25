@@ -72,3 +72,11 @@ item_table: dict[str, ItemData] = {
 
 item_id_table = {name: data.id for name, data in item_table.items()}
 item_name_table = {data.id: name for name, data in item_table.items()}
+
+point_table = {
+    "Tiny Point Increase":   V_TINY,
+    "Small Point Increase":  V_SMALL,
+    "Medium Point Increase": V_MEDIUM,
+    "Large Point Increase":  V_LARGE,
+    "Huge Point Increase":   V_HUGE,
+}
