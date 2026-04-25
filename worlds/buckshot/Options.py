@@ -42,6 +42,30 @@ class DoubleOrNothingRequirements(Choice):
     option_vanilla_plus = 3
     default = 1
 
+class AsynchronousPoints(Toggle):
+    """
+    If enabled, points required for a 1000K or custom goal can be obtained across multiple runs.
+    """
+    display_name = "Asynchronous Points"
+
+class AdditionalGoalRequirements(Choice):
+    """
+    Specify any additional requirements needed to reach goal.
+
+    - **None**: No additional requirements need to be met in order to goal.
+    - **Shots**: Obtain a percentage of your shotsanity checks specified by the "Shotsanity Goal Percentage" option.
+    - **Streak**: Reach the maximum streak set in the "Streaksanity Count" option.
+    - **Sanities**: Both shotsanity and streaksanity additional requirements are included
+
+    If the respective sanities are not enabled, the additional goals will not be included.
+    """
+    display_name = "Additional Goal Requirements"
+    option_none = 0
+    option_shots = 1
+    option_streak = 2
+    option_sanities = 3
+    default = 0
+
 class ConsumableItemLogic(Choice):
     """
     Specify how consumable items affect the logic for your game. In solo worlds, this only has a noticeable effect
@@ -267,6 +291,16 @@ class BalancedShotsanityCountPerRound(Range):
     range_end = 1000
     default = 5
 
+class ShotsanityGoalPercentage(Range):
+    """
+    If included as an additional goal requirement, specify the percentage of
+    shotsanity checks needed for goal.
+    """
+    display_name = "Shotsanity Goal Percentage"
+    range_start = 1
+    range_end = 100
+    default = 100
+
 class Streaksanity(Choice):
     """
     Streaksanity adds locations for every successful shot made on the dealer in a row without losing health (or resetting).
@@ -325,7 +359,9 @@ option_groups = [
     OptionGroup("Goal", [
         Goal,
         CustomGoalAmount,
-        DoubleOrNothingRequirements
+        DoubleOrNothingRequirements,
+        AsynchronousPoints,
+        AdditionalGoalRequirements
     ]),
     OptionGroup("Difficulty", [
         ConsumableItemLogic,
@@ -341,7 +377,8 @@ option_groups = [
     OptionGroup("Shotsanity", [
         Shotsanity,
         ShotsanityCount,
-        BalancedShotsanityCountPerRound
+        BalancedShotsanityCountPerRound,
+        ShotsanityGoalPercentage
     ]),
     OptionGroup("Streaksanity", [
         Streaksanity,
