@@ -42,12 +42,6 @@ class DoubleOrNothingRequirements(Choice):
     option_vanilla_plus = 3
     default = 1
 
-class AsynchronousPoints(Toggle):
-    """
-    If enabled, points required for a 1000K or custom goal can be obtained across multiple runs.
-    """
-    display_name = "Asynchronous Points"
-
 class AdditionalGoalRequirements(Choice):
     """
     Specify any additional requirements needed to reach goal.
@@ -65,6 +59,24 @@ class AdditionalGoalRequirements(Choice):
     option_streak = 2
     option_sanities = 3
     default = 0
+
+class AsynchronousPoints(Toggle):
+    """
+    If enabled, points required for a 1000K or custom goal can be obtained across multiple runs.
+
+    Additionally, some filler items will be replaced with point increase items, which add points
+    to your point total upon finding one.
+    """
+    display_name = "Asynchronous Points"
+
+class PointFillerPercentage(Range):
+    """
+    Specify the maximum percentage of your required point total to be added as filler items.
+    """
+    display_name = "Point Filler Percentage"
+    range_start = 0
+    range_end = 100
+    default = 25
 
 class ConsumableItemLogic(Choice):
     """
@@ -360,8 +372,9 @@ option_groups = [
         Goal,
         CustomGoalAmount,
         DoubleOrNothingRequirements,
+        AdditionalGoalRequirements,
         AsynchronousPoints,
-        AdditionalGoalRequirements
+        PointFillerPercentage
     ]),
     OptionGroup("Difficulty", [
         ConsumableItemLogic,
