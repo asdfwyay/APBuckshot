@@ -465,6 +465,7 @@ class BuckshotWorld(World):
             "asynchronous_points": self.options.asynchronous_points.value,
             "point_filler_percentage": self.options.point_filler_percentage.value,
             "additional_goal_requirements": self.options.additional_goal_requirements.value,
+            "shotsanity_count": self.options.shotsanity_count.value,
             "shotsanity_goal_percentage": 0 if self.options.shotsanity == "off" else self.options.shotsanity_goal_percentage.value,
             "streaksanity_count": 0 if self.options.streaksanity == "off" else self.options.streaksanity_count.value
         }
