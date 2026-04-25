@@ -60,11 +60,11 @@ item_table: dict[str, ItemData] = {
     "Snapped Burner Phone":             ItemData(0x0700 + 9,  IC.filler),
     "Empty Adrenaline Vial":            ItemData(0x0700 + 10, IC.filler),
 
-    "Tiny Point Increase":              ItemData(0x0800 + 1,  IC.filler),
-    "Small Point Increase":             ItemData(0x0800 + 2,  IC.filler),
-    "Medium Point Increase":            ItemData(0x0800 + 3,  IC.filler),
-    "Large Point Increase":             ItemData(0x0800 + 4,  IC.filler),
-    "Huge Point Increase":              ItemData(0x0800 + 5,  IC.filler),
+    "Tiny Point Increase":              ItemData(0x0800 + 1,  IC.filler), # 0.25 %
+    "Small Point Increase":             ItemData(0x0800 + 2,  IC.filler), # 0.5 %
+    "Medium Point Increase":            ItemData(0x0800 + 3,  IC.filler), # 1 %
+    "Large Point Increase":             ItemData(0x0800 + 4,  IC.filler), # 2 %
+    "Huge Point Increase":              ItemData(0x0800 + 5,  IC.filler), # 5 %
 
     "Base Game Beaten":                 ItemData(0x0F00 + 1,  IC.progression, I_EVENT),
     "WINNER":                           ItemData(0x0F00 + 2,  IC.progression, I_EVENT),
