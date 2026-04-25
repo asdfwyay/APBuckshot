@@ -432,7 +432,14 @@ class BuckshotWorld(World):
             goal_location = "Cash Out"
 
         self.multiworld.get_location(goal_location, self.player).place_locked_item(self.create_event("WINNER", 0x0F00 + 2))
-        self.multiworld.completion_condition[self.player] = lambda state: state.has("WINNER", self.player)
+
+        if self.options.streaksanity != "off" and self.options.additional_goal_requirements in ["streak", "sanities"]:
+            self.multiworld.completion_condition[self.player] = lambda state: (
+                state.has("WINNER", self.player)
+                and state.can_reach_location(f"Streaksanity - {self.options.streaksanity_count.value} in a Row", self.player)
+            )
+        else:
+            self.multiworld.completion_condition[self.player] = lambda state: state.has("WINNER", self.player)
     
     def generate_early(self) -> None:
         if self.options.consumable_item_logic == "none" and not self.settings.allow_no_consumable_item_logic:
@@ -456,7 +463,9 @@ class BuckshotWorld(World):
             "item_debuffs": self.options.item_debuffs.value,
             "included_custom_mechanics": self.options.included_custom_mechanics.value,
             "asynchronous_points": self.options.asynchronous_points.value,
-            "point_filler_percentage": self.options.point_filler_percentage.value
+            "point_filler_percentage": self.options.point_filler_percentage.value,
+            "additional_goal_requirements": self.options.additional_goal_requirements.value,
+            "shotsanity_goal_percentage": self.options.shotsanity_goal_percentage
         }
 
 def int_log2(x: int) -> int:
