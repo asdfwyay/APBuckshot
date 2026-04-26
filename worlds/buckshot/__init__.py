@@ -102,6 +102,9 @@ class BuckshotWorld(World):
             ]
         
     def generate_point_item_weights(self, remaining_locations: int) -> list[float]:
+        if remaining_locations <= 0:
+            return [1 for _ in self.filler_pt_items]
+
         k = self.options.point_filler_percentage / remaining_locations
         if k <= V_TINY:
             weights = [0 for _ in self.filler_pt_items]
@@ -203,7 +206,7 @@ class BuckshotWorld(World):
 
         # Add Filler Items
         remaining_locations = total_locations - len(item_pool) - 1
-        if self.options.asynchronous_points and remaining_locations > 0:
+        if self.options.asynchronous_points:
             self.point_item_weights = self.generate_point_item_weights(remaining_locations)
         item_pool += [self.create_filler() for _ in range(remaining_locations)]
 
