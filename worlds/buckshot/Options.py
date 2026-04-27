@@ -253,6 +253,32 @@ class ExcludeFullHouse(DefaultOnToggle):
     """
     display_name = "Exclude Full House"
 
+class CustomAchievements(Choice):
+    """
+    Specify whether to include entirely custom achievements as locations.
+
+    - **Off**:
+        Custom achievements are disabled.
+    - **Normal**:
+        Custom achievements are enabled. Achievements labelled as "hard" are excluded.
+    - **Hard**:
+        Custom achievements are enabled. No achievements are excluded.
+
+    Custom achievements which utilize custom mechanics will only be included if the
+    respective mechanic is enabled in "Custom Mechanics."
+    
+    Furthermore, if "Exclude Full House" is set to true, the custom achievement "Fuller House"
+    will also be excluded regardless of this setting's value.
+
+    A list containing descriptions of custom achievements can be found here:
+    TODO: Add link to doc
+    """
+    display_name = "Custom Achievements"
+    option_off = 0
+    option_normal = 1
+    option_hard = 2
+    default = 0
+
 class Shotsanity(Choice):
     """
     Shotsanity adds locations for every successful live and blank shot up to a specified amount.
@@ -364,6 +390,7 @@ class BuckshotRouletteOptions(PerGameCommonOptions):
     included_traps: IncludedTraps
     trap_fill_percentage: TrapFillPercentage
     exclude_full_house: ExcludeFullHouse
+    custom_achievements: CustomAchievements
     shotsanity: Shotsanity
     shotsanity_count: ShotsanityCount
     balanced_shotsanity_count_per_round: BalancedShotsanityCountPerRound
@@ -389,7 +416,8 @@ option_groups = [
         TrapFillPercentage
     ]),
     OptionGroup("Achievements", [
-        ExcludeFullHouse
+        ExcludeFullHouse,
+        CustomAchievements
     ]),
     OptionGroup("Shotsanity", [
         Shotsanity,
