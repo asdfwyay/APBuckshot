@@ -214,7 +214,8 @@ class BuckshotWorld(World):
 
     def create_regions(self) -> None:
         # Setup Locations
-        included_location_flags: int = 0x00
+        included_location_flags: int = 0x000
+        included_buff_flags: int = 0x000
         custom_goal_don_locations = 6*(1 + int_log2((self.options.custom_goal_amount - 1)//35000))
 
         included_location_flags |= L_ACHIEVEMENT
@@ -232,6 +233,15 @@ class BuckshotWorld(World):
             included_location_flags |= L_STREAKSANITY
         if self.options.goal in ["1000k", "custom"]:
             included_location_flags |= L_CASH_OUT
+        if self.options.custom_achievements == "normal":
+            included_location_flags |= L_ACHIEVEMENT_CUSTOM
+        elif self.options.custom_achievements == "hard":
+            included_location_flags |= L_ACHIEVEMENT_CUSTOM | L_ACHIEVEMENT_CUSTOM_HARD
+        if "Item Buffs" in self.options.included_custom_mechanics.value:
+            included_location_flags |= L_ITEM_BUFF
+            for buff in self.options.item_buffs.value:
+                included_buff_flags |= 1 << (item_id_table[buff] - 2)
+
 
         # Filter locations based on flags, goal, & shotsanity settings
         self.included_locations = {
@@ -254,6 +264,10 @@ class BuckshotWorld(World):
                 and (
                     location_data.id - L_OFST_STS <= self.options.streaksanity_count - 1
                     if location_data.flags & L_STREAKSANITY else True
+                )
+                and (
+                    included_buff_flags & location_data.buff_flags == location_data.buff_flags
+                    if location_data.flags & L_ITEM_BUFF else True
                 )
             )
         }

@@ -10,7 +10,8 @@ class BuckshotRouletteLocation(Location):
 class LocationData:
     id: int
     region: str
-    flags: int = 0x00
+    flags: int = 0x000
+    buff_flags: int = 0x000
 
 location_table: dict[str, LocationData] = {
     "Win First Round - Item 1":             		LocationData(0x0000 + 1,     R_TABLE),
@@ -129,14 +130,14 @@ location_table: dict[str, LocationData] = {
 
 	"The Night is Still Young":					    LocationData(0x0700 + 1,	 R_BATHROOM,         L_ACHIEVEMENT_CUSTOM),
     "Taking Out The Trash":					        LocationData(0x0700 + 2,	 R_TABLE,            L_ACHIEVEMENT_CUSTOM),
-    "No Really... Why?":					        LocationData(0x0700 + 3,	 R_TABLE,            L_ACHIEVEMENT_CUSTOM | L_ITEM_BUFF),
+    "No Really... Why?":					        LocationData(0x0700 + 3,	 R_TABLE,            L_ACHIEVEMENT_CUSTOM | L_ITEM_BUFF, 0x003),
     "Scam Call":					        		LocationData(0x0700 + 4,	 R_DON_TABLE,        L_ACHIEVEMENT_CUSTOM | L_DOUBLE_OR_NOTHING),
 	"Make Up Your Mind":							LocationData(0x0700 + 5,	 R_DON_TABLE,        L_ACHIEVEMENT_CUSTOM | L_DOUBLE_OR_NOTHING),
-    "You're Too Slow":								LocationData(0x0700 + 6,	 R_DON_TABLE,        L_ACHIEVEMENT_CUSTOM | L_DOUBLE_OR_NOTHING | L_ITEM_BUFF),
+    "You're Too Slow":								LocationData(0x0700 + 6,	 R_DON_TABLE,        L_ACHIEVEMENT_CUSTOM | L_DOUBLE_OR_NOTHING),
 
 	"Clean Sweep":									LocationData(0x0800 + 1,	 R_TABLE,            L_ACHIEVEMENT_CUSTOM_HARD),
     "Speed Shooter":								LocationData(0x0800 + 2,	 R_DON_TABLE,        L_ACHIEVEMENT_CUSTOM_HARD | L_DOUBLE_OR_NOTHING),
-	"Fuller House":                           		LocationData(0x0800 + 3,     R_DON_TABLE,        L_ACHIEVEMENT_CUSTOM_HARD | L_DOUBLE_OR_NOTHING | L_ITEM_BUFF | L_FULL_HOUSE),
+	"Fuller House":                           		LocationData(0x0800 + 3,     R_DON_TABLE,        L_ACHIEVEMENT_CUSTOM_HARD | L_DOUBLE_OR_NOTHING | L_FULL_HOUSE | L_ITEM_BUFF, 0x1FF),
 
 	"Shotsanity - 1 Correct":					    LocationData(0x1000 + 1,	 R_TABLE,            L_SHOTSANITY),
 	"Shotsanity - 2 Correct":					    LocationData(0x1000 + 2,	 R_TABLE,            L_SHOTSANITY),
