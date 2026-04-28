@@ -26,8 +26,8 @@ item_table: dict[str, ItemData] = {
     "Progressive Item Luck":            ItemData(0x0100 + 1,  IC.useful,      I_SPECIAL),
     "Life Bank Charge":                 ItemData(0x0100 + 2,  IC.useful,      I_SPECIAL),
 
-    "Item Buff - Hand Saw":             ItemData(0x0100 + 3,  IC.useful,      I_SPECIAL),
-    "Item Buff - Magnifying Glass":     ItemData(0x0100 + 4,  IC.useful,      I_SPECIAL),
+    "Item Buff - Hand Saw":             ItemData(0x0100 + 3,  IC.progression, I_SPECIAL),
+    "Item Buff - Magnifying Glass":     ItemData(0x0100 + 4,  IC.progression, I_SPECIAL),
     "Item Buff - Beer":                 ItemData(0x0100 + 5,  IC.useful,      I_SPECIAL),
     "Item Buff - Cigarette Pack":       ItemData(0x0100 + 6,  IC.useful,      I_SPECIAL),
     "Item Buff - Handcuffs":            ItemData(0x0100 + 7,  IC.useful,      I_SPECIAL),

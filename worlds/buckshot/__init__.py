@@ -440,6 +440,35 @@ class BuckshotWorld(World):
                 lambda state: state.can_reach_location(f"Double or Nothing - Win {max_don_round} Rounds - Item 1", self.player)
             )
         
+        # Custom Achievements
+        if self.options.custom_achievements in ["normal", "hard"]:
+            add_rule(
+                self.get_location("Taking Out The Trash"),
+                consumable_rule(self, consumable_item_counts[1], True)
+            )
+
+            if self.options.goal != "70k":
+                add_rule(
+                    self.get_location("Scam Call"),
+                    specific_consumables_rule(self, ["Burner Phone"])
+                )
+                add_rule(
+                    self.get_location("Make Up Your Mind"),
+                    specific_consumables_rule(self, ["Inverter"])
+                )
+                add_rule(
+                    self.get_location("You're Too Slow"),
+                    specific_consumables_rule(self, ["Adrenaline"])
+                )
+
+            if "No Really... Why?" in self.multiworld.regions.location_cache[self.player]:
+                add_rule(
+                    self.get_location("No Really... Why?"),
+                    lambda state: specific_consumables_rule(self, ["Item Buff - Magnifying Glass", "Item Buff - Hand Saw"])(state) and 
+                                state.can_reach_location("Why?", self.player) and
+                                state.can_reach_location("Going Out With Style!", self.player)
+                )
+        
         # Completion Condition
         if self.options.goal == "70k":
             goal_location = "Win Final Round"
