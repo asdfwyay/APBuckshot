@@ -105,7 +105,7 @@ class BuckshotWorld(World):
         if remaining_locations <= 0:
             return [1 for _ in self.filler_pt_items]
 
-        k = self.options.point_filler_percentage / remaining_locations
+        k = 2.0 * self.options.point_filler_percentage / remaining_locations
         if k <= V_TINY:
             weights = [0 for _ in self.filler_pt_items]
             weights[0] = 1
