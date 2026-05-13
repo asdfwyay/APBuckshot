@@ -124,7 +124,7 @@ installation folder along with `Buckshot Roulette.x86_64`.
 8.  Launch Buckshot Roulette and enjoy! A notification will appear on your first launch stating
 that new mods have been installed. When reaching the start menu, an `ARCHIPELAGO` button should be visible
 below the `MULTIPLAYER` button.
-    > If you experience crashes or graphical issues during when starting the game, add the following to the game's launch options:
+    > If you experience crashes or graphical issues when starting the game, add the following to the game's launch options:
     > ```sh
     > --rendering-driver opengl3
     > ```
