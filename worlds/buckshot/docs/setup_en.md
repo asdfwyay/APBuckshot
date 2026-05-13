@@ -48,14 +48,14 @@
     4. Run the shortcut.
 
     #### Powershell
-    Replace `<path/to/game/dir>` with the path to the folder where the game is installed.
+    Replace `<path/to/game/dir>` with the path to the `Buckshot Roulette_windows` folder.
     ```pwsh
     cd "<path/to/game/dir>"
     & ".\Buckshot Roulette.exe" --script addons/mod_loader/mod_loader_setup.gd
     ```
 
     #### Command Prompt
-    Replace `<path/to/game/dir>` with the path to the folder where the game is installed.
+    Replace `<path/to/game/dir>` with the path to the `Buckshot Roulette_windows` folder.
     ```cmd
     cd "<path/to/game/dir>"
     ".\Buckshot Roulette.exe" --script addons/mod_loader/mod_loader_setup.gd
@@ -101,7 +101,7 @@ below the `MULTIPLAYER` button.
 
 3.  Place the `/addons` folder from the mod loader into the `Buckshot Roulette_linux` folder.
 
-4.  Install the mod loader. Replace `<path/to/game/dir>` with the path to your game directory.
+4.  Install the mod loader. Replace `<path/to/game/dir>` with the path to the `Buckshot Roulette_linux` folder.
     ```sh
     cd "<path/to/game/dir>"
     ./"Buckshot Roulette.x86_64" --script addons/mod_loader/mod_loader_setup.gd --setup-create-override-cfg
