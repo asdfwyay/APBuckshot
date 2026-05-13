@@ -12,8 +12,8 @@ Furthermore, depending on settings, the player may need to obtain the "Double or
 item to unlock the ability to play Double or Nothing mode.
 
 The locations in which items could appear within Buckshot Roulette include round completions
-in both the main game and Double or Nothing mode. Additionally, depending on player settings,
-achievements and successful shots can also be added as locations.
+in both the main game and Double or Nothing mode as well as achievements. Additionally,
+depending on player settings, successful shots and streaks can also be added as locations.
 
 Furthermore, custom mechanics can be added to the game. Details about these custom mechanics
 can be found in the player settings.
@@ -23,6 +23,9 @@ can be found in the player settings.
 As mentioned previously, all consumable items and the double or nothing pills will be shuffled.
 Filler items are also shuffled into the item pool. Gameplay is not affected when obtaining
 these items.
+
+Custom buffs and debuffs for items can also be included in the item pool depending on player
+settings.
 
 ## What happens when the player receives an item?
 
