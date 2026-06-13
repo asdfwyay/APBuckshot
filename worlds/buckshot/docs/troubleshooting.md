@@ -25,3 +25,5 @@ You likely installed the default Godot Mod Loader instead of the custom one.
 
 2. Reinstall the mod using the [custom mod loader](https://github.com/asdfwyay/APBuckshot-Client/releases/tag/gml-7.0.1-custom).
 
+### I am receiving items but my in-game tracker does not mark them as obtained.
+If the items you're receiving have an additional adjective in their name (e.g. **Empty** Cigarette Box, **Broken** Handcuffs, etc.), they're filler items which don't do anything and, therefore, not tracked by the in-game tracker.
