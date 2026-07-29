@@ -39,7 +39,7 @@
     2. Right-click the shortcut you created (typically named `Buckshot Roulette.exe - Shortcut`).
     then click `Properties`.
 
-    3. Add the following to the end of the `Target` field:
+    3. Add the following to the end of the `Target` field: (Note: the first character is a space)
     
     ```cmd
      --script addons/mod_loader/mod_loader_setup.gd
